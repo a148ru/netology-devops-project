@@ -19,7 +19,9 @@ variable "auth_file" {
 }
 variable "sa_file_key" {
   type = string
+  default = "../sa_key.json"
 }
 variable "env_file" {
   type = string
+  default = "../.env"
 }
