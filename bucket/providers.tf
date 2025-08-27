@@ -10,7 +10,7 @@ terraform {
 
 
 provider "yandex" {
-  service_account_key_file = var.sa_file_key
+  service_account_key_file = var.auth_file
   cloud_id  = var.cloud_id
   folder_id = var.folder_id
 }

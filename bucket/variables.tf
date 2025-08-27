@@ -1,7 +1,7 @@
 ###cloud vars
-variable "sa_file_key" {
+/* variable "sa_file_key" {
   type = string
-}
+} */
 
 variable "cloud_id" {
   type        = string
@@ -18,4 +18,7 @@ variable "sa_id" {
 variable "env_file" {
   type = string
   default = "../.env"
+}
+variable "auth_file" {
+  type = string
 }

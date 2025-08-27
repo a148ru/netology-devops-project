@@ -24,7 +24,8 @@ terraform {
 }
 
 provider "yandex" {
-  token     = var.token
+  # token     = var.token
+  service_account_key_file = var.auth_file
   cloud_id  = var.cloud_id
   folder_id = var.folder_id
 }

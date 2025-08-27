@@ -1,8 +1,8 @@
 ###cloud vars
-variable "token" {
+/* variable "token" {
   type        = string
   description = "OAuth-token; https://cloud.yandex.ru/docs/iam/concepts/authorization/oauth-token"
-}
+} */
 
 variable "cloud_id" {
   type        = string
@@ -22,5 +22,8 @@ variable "static_access_key" {
   type = string
 }
 variable "static_secret_key" {
+  type = string
+}
+variable "auth_file" {
   type = string
 }
