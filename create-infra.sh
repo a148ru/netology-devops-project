@@ -1,5 +1,6 @@
 #!/bin/bash -x
 
+DESTROY=0
 
 # Выводит справку
 help() {
@@ -8,8 +9,90 @@ help() {
     echo "  -a, --auth-file PATH        Путь к файлу authorized_key.json"
     echo "  -c, --cloud-id VALUE        id облака в Yandex Cloud"
     echo "  -f, --folder-id VALUE       id каталога в Yandex Cloud"
+    echo "  -d, --destroy               Удалить ресурсы"
     echo "  -h, --help                  Вывести эту справку"
     exit 1
+}
+
+# Удаляет стейт из бакета
+delete_state(){
+    if yc storage s3api delete-object --bucket $1 --key $2
+    then
+      echo "state delete - done"
+    else
+      echo "state delete - error"
+      exit 1
+    fi
+}
+
+# Создает файл personal.auto.tfvars
+# первый пареметр - путь к файлу ключей - абсолютный путь
+# второй параметр - целевая дериктория - относительный путь
+create_personal_vars(){
+    echo "cloud_id=\"${TF_VAR_cloud_id}\"
+folder_id=\"${TF_VAR_folder_id}\"
+auth_file=\"${1}\"" > ./$2/personal.auto.tfvars
+}
+
+# Создает ресурсы
+# В параметре указать имя директории относительно текущей или абсалютный путь
+create_resource(){
+    if terraform -chdir=$1 init
+    then
+        if terraform -chdir=$1 apply -auto-approve
+        then
+            source $TF_VAR_env_file
+        else
+            exit 1
+        fi
+    fi
+}
+
+create_infra(){
+    if terraform -chdir=$1 init -backend-config="access_key=$TF_VAR_static_access_key" -backend-config="secret_key=$TF_VAR_static_secret_key" -backend-config="bucket=$TF_VAR_storage_id" -reconfigure
+    then
+        if terraform -chdir=$1 apply -auto-approve
+        then
+          echo "done"
+        else
+          echo "Смотри ошибки"
+          exit 1
+        fi
+    fi
+}
+apply(){
+
+  # Экспорт переменных в окружение
+
+#export TF_VAR_token=$(yc iam create-token)
+export TF_VAR_cloud_id="${TF_VAR_cloud_id}"
+export TF_VAR_folder_id="${TF_VAR_folder_id}"
+export TF_VAR_auth_file="${TF_VAR_auth_file}"
+export TF_VAR_env_file="$PWD/.env"
+export TF_VAR_sa_file_key="$PWD/sa_key.json" 
+
+    # Создаем сервисный аккаунт и необходимые ключи
+    create_resource "sa"
+    create_personal_vars $TF_VAR_auth_file "sa"
+    create_personal_vars $TF_VAR_auth_file "bucket"
+
+    # Создаем бакет
+    create_resource "bucket"
+    create_personal_vars $TF_VAR_sa_file_key "infra"
+
+    create_infra "infra"
+}
+
+destroy(){
+    source $PWD/.env
+    if terraform -chdir=infra destroy -auto-approve
+    then
+      delete_state $TF_VAR_storage_id "terraform.tfstate"
+    else
+      exit 1
+    fi
+    terraform -chdir=bucket destroy -auto-approve
+    terraform -chdir=sa destroy -auto-approve
 }
 
 # Обрабатываем аргументов командной строки
@@ -18,6 +101,7 @@ while [[ "$#" -gt 0 ]]; do
         -a|--auth-file) TF_VAR_auth_file="${PWD}/${2}"; shift ;;
         -c|--cloud-id) TF_VAR_cloud_id="$2"; shift ;;
         -f|--folder-id) TF_VAR_folder_id="$2"; shift ;;
+        -d|--destroy) DESTROY=1; shift ;;
         -h|--help) help ;;
         *) echo "Проверь параметры: $1"; help ;;
     esac
@@ -35,54 +119,13 @@ then
 fi
 
 
-# Экспорт переменных в окружение
-
-#export TF_VAR_token=$(yc iam create-token)
-export TF_VAR_cloud_id="${TF_VAR_cloud_id}"
-export TF_VAR_folder_id="${TF_VAR_folder_id}"
-export TF_VAR_auth_file="${TF_VAR_auth_file}"
-export TF_VAR_env_file="$PWD/.env"
-export TF_VAR_sa_file_key="$PWD/sa_key.json" 
 
 
-# Создаем сервисный аккаунт и необходимые ключи
 
-if terraform -chdir=sa init
+
+if [ $DESTROY -eq 1 ]
 then
-    if terraform -chdir=sa apply -auto-approve
-    then
-        source $TF_VAR_env_file
-    else
-     exit -1
-    fi
-fi
-
-echo "cloud_id=\"${TF_VAR_cloud_id}\"
-folder_id=\"${TF_VAR_folder_id}\"
-auth_file=\"${TF_VAR_auth_file}\"" > ./bucket/personal.auto.tfvars
-
-# Создаем бакет
-if terraform -chdir=bucket init
-then
-    if terraform -chdir=bucket apply -auto-approve
-    then
-        source $TF_VAR_env_file
-    else
-        exit -1
-    fi
-fi
-
-echo "cloud_id=\"${TF_VAR_cloud_id}\"
-folder_id=\"${TF_VAR_folder_id}\"
-auth_file=\"${TF_VAR_sa_file_key}\"" > ./infra/personal.auto.tfvars
-
-if terraform -chdir=infra init -backend-config="access_key=$TF_VAR_static_access_key" -backend-config="secret_key=$TF_VAR_static_secret_key" -backend-config="bucket=$TF_VAR_storage_id"
-then
-    if terraform -chdir=infra apply -auto-approve
-    then
-      echo "done"
-    else
-      echo "Смотри ошибки"
-      exit -1
-    fi
+  destroy
+else
+  apply
 fi
