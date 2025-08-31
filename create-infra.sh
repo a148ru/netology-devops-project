@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 DESTROY=0
 
@@ -60,6 +60,7 @@ create_infra(){
         fi
     fi
 }
+
 apply(){
 
   # Экспорт переменных в окружение
@@ -98,7 +99,7 @@ destroy(){
 # Обрабатываем аргументов командной строки
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        -a|--auth-file) TF_VAR_auth_file="${PWD}/${2}"; shift ;;
+        -a|--auth-file) file_name="${2}"; shift ;;
         -c|--cloud-id) TF_VAR_cloud_id="$2"; shift ;;
         -f|--folder-id) TF_VAR_folder_id="$2"; shift ;;
         -d|--destroy) DESTROY=1; shift ;;
@@ -107,6 +108,20 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+if [[ "$file_name" == /* ]]; then
+    # Если путь абсолютный
+    TF_VAR_auth_file="$file_name"
+else
+    # Если путь относительный
+    TF_VAR_auth_file="$(pwd)/$file_name"
+fi
+
+# Проверяем существование файла
+if [ ! -f "$TF_VAR_auth_file" ]; then
+    echo "Ошибка: файл не найден по пути '$TF_VAR_auth_file'"
+    exit 1
+fi
 
 # Проверяем переменные
 

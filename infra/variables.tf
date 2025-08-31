@@ -84,3 +84,6 @@ variable "vms_ssh_root_key" {
   default     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMk9vrkXYEC0Sm0DBtMXuSTWSH771egCT/P35D2ll6f a148ru@polaris134"
   description = "ssh-keygen -t ed25519"
 }
+variable "sa_id" {
+  type = string
+}
