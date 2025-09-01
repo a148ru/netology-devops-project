@@ -87,3 +87,18 @@ variable "vms_ssh_root_key" {
 variable "sa_id" {
   type = string
 }
+
+variable "k8s_version" {
+  type = string
+  default = "1.32"
+}
+
+variable "node_resource" {
+  type = map(number)
+  default = {
+    "cores" = 2
+    "core_fraction" = 50
+    "memory" = 2
+    "disk_size" = 64
+  }
+}
