@@ -1,9 +1,3 @@
-###cloud vars
-/* variable "token" {
-  type        = string
-  description = "OAuth-token; https://cloud.yandex.ru/docs/iam/concepts/authorization/oauth-token"
-} */
-
 variable "cloud_id" {
   type        = string
   description = "https://cloud.yandex.ru/docs/resource-manager/operations/cloud/get-id"
@@ -50,10 +44,6 @@ variable "default_cidr" {
   }
   description = "https://cloud.yandex.ru/docs/vpc/operations/subnet-create"
 }
-variable "image" {
-  type = map(string)
-  default = { test="ubuntu-2004-lts" }
-}
 
 variable "platform" {
   type = map(string)
@@ -63,7 +53,6 @@ variable "platform" {
     3 = "standard-v3"
   }
 }
-
 
 variable vm_param {
   type = map(any)
@@ -75,15 +64,12 @@ variable vm_param {
     })
   }
 }
+
 variable "user_name" {
   type = string
   default = "ubuntu"
 }
-variable "vms_ssh_root_key" {
-  type        = string
-  default     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMk9vrkXYEC0Sm0DBtMXuSTWSH771egCT/P35D2ll6f a148ru@polaris134"
-  description = "ssh-keygen -t ed25519"
-}
+
 variable "sa_id" {
   type = string
 }
@@ -100,5 +86,12 @@ variable "node_resource" {
     "core_fraction" = 50
     "memory" = 2
     "disk_size" = 64
+  }
+}
+
+variable "cluster" {
+  type = map(string)
+  default = {
+    region = "ru-central1"
   }
 }

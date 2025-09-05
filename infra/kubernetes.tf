@@ -1,75 +1,33 @@
 resource "yandex_kubernetes_cluster" "cluster" {
  network_id = yandex_vpc_network.develop.id
- master {
-   master_location {
-     zone      = yandex_vpc_subnet.develop["a"].zone
-     subnet_id = yandex_vpc_subnet.develop["a"].id
-   }
-   master_location {
-     zone      = yandex_vpc_subnet.develop["b"].zone
-     subnet_id = yandex_vpc_subnet.develop["b"].id
-   }
-   master_location {
-     zone      = yandex_vpc_subnet.develop["c"].zone
-     subnet_id = yandex_vpc_subnet.develop["c"].id
-   }
-   security_group_ids = [yandex_vpc_security_group.cluster.id]
+
+
+master {
+    regional {
+      region = var.cluster.region
+    
+      dynamic "location" {
+        for_each = [for s in values(yandex_vpc_subnet.develop) : {
+          zone = s.zone
+          subnet_id = s.id
+        }]
+        content {
+          zone = location.value.zone
+          subnet_id = location.value.subnet_id
+        }
+      }
+    }
+  
+  version = var.k8s_version
+  public_ip = true
+  
+  scale_policy {
+    auto_scale {
+      min_resource_preset_id = "s-c2-m8"
+    }
+  }
+  security_group_ids = [yandex_vpc_security_group.cluster.id]
  }
  service_account_id      = var.sa_id
  node_service_account_id = var.sa_id
-   /* depends_on = [
-     yandex_resourcemanager_folder_iam_member.k8s-clusters-agent,
-     yandex_resourcemanager_folder_iam_member.vpc-public-admin,
-     yandex_resourcemanager_folder_iam_member.images-puller
-   ] */
 }
-
-resource "yandex_vpc_security_group" "cluster" {
-  name        = "cluster"
-  description = "Правила группы обеспечивают базовую работоспособность кластера Managed Service for Kubernetes. Примените ее к кластеру и группам узлов."
-  network_id  = yandex_vpc_network.develop.id
-  ingress {
-    protocol          = "TCP"
-    description       = "Правило разрешает проверки доступности с диапазона адресов балансировщика нагрузки. Нужно для работы отказоустойчивого кластера Managed Service for Kubernetes и сервисов балансировщика."
-    predefined_target = "loadbalancer_healthchecks"
-    from_port         = 0
-    to_port           = 65535
-  }
-  ingress {
-    protocol          = "ANY"
-    description       = "Правило разрешает взаимодействие мастер-узел и узел-узел внутри группы безопасности."
-    predefined_target = "self_security_group"
-    from_port         = 0
-    to_port           = 65535
-  }
-  ingress {
-    protocol          = "ANY"
-    description       = "Правило разрешает взаимодействие под-под и сервис-сервис. Укажите подсети вашего кластера Managed Service for Kubernetes и сервисов."
-    v4_cidr_blocks    = concat(yandex_vpc_subnet.develop["a"].v4_cidr_blocks,
-                              yandex_vpc_subnet.develop["b"].v4_cidr_blocks,
-                              yandex_vpc_subnet.develop["c"].v4_cidr_blocks)
-    from_port         = 0
-    to_port           = 65535
-  }
-  ingress {
-    protocol          = "ICMP"
-    description       = "Правило разрешает отладочные ICMP-пакеты из внутренних подсетей."
-    v4_cidr_blocks    = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
-  }
-  ingress {
-    protocol          = "TCP"
-    description       = "Правило разрешает входящий трафик из интернета на диапазон портов NodePort. Добавьте или измените порты на нужные вам."
-    v4_cidr_blocks    = ["0.0.0.0/0"]
-    from_port         = 30000
-    to_port           = 32767
-  }
-  egress {
-    protocol          = "ANY"
-    description       = "Правило разрешает весь исходящий трафик. Узлы могут связаться с Yandex Container Registry, Yandex Object Storage, Docker Hub и т. д."
-    v4_cidr_blocks    = ["0.0.0.0/0"]
-    from_port         = 0
-    to_port           = 65535
-  }
-}
-
-

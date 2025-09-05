@@ -19,7 +19,7 @@ resource "yandex_kubernetes_node_group" "ng-1" {
     network_interface {
       security_group_ids = [yandex_vpc_security_group.cluster.id]
       subnet_ids         = [yandex_vpc_subnet.develop["a"].id, yandex_vpc_subnet.develop["b"].id, yandex_vpc_subnet.develop["c"].id]
-      nat                = true
+      nat                = false
     }
     scheduling_policy {
       preemptible = true
@@ -52,9 +52,6 @@ resource "yandex_kubernetes_node_group" "ng-1" {
     location {
       zone = var.default_zone.c
     }
-  }
-  node_labels = {
-    node-label1 = "node-value1"
   }
   node_taints = ["taint1=taint-value1:NoSchedule"]
   labels = {
