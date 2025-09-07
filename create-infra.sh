@@ -133,11 +133,6 @@ then
   help
 fi
 
-
-
-
-
-
 if [ $DESTROY -eq 1 ]
 then
   destroy
