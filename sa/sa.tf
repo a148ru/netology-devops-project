@@ -27,10 +27,10 @@ resource "yandex_resourcemanager_folder_iam_member" "vpc-public-admin" {
  member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
 
-resource "yandex_resourcemanager_folder_iam_member" "images-puller" {
- # Сервисному аккаунту назначается роль "container-registry.images.puller".
+resource "yandex_resourcemanager_folder_iam_member" "registry-admin" {
+ # Сервисному аккаунту назначается роль "container-registry.admin".
  folder_id = var.folder_id
- role      = "container-registry.images.puller"
+ role      = "container-registry.admin"
  member    = "serviceAccount:${yandex_iam_service_account.terraform_sa.id}"
 }
 

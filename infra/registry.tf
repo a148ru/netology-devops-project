@@ -10,12 +10,6 @@ resource "yandex_container_registry_ip_permission" "allow-ip" {
   push = var.allow_ip
   pull = var.allow_ip
 }
-output "registry_id" {
-  value = yandex_container_registry.registry.id
-}
-resource "null_resource" "export_registry_id" {
-  depends_on = [ yandex_container_registry.registry ]
-  provisioner "local-exec" {
-    command =  "echo 'export DOCKER_REGISTRY=${yandex_container_registry.registry.id}' > .env"
-  }
+output "registry_endpoint" {
+  value = "${yandex_container_registry.registry.id}"
 }

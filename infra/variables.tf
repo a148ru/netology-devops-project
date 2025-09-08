@@ -73,3 +73,6 @@ variable "registry_name" {
 variable "allow_ip" {
   type = list(string)
 }
+variable "env_file" {
+  type = string
+}

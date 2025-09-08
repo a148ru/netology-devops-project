@@ -34,3 +34,4 @@ cluster = {
     region = "ru-central1"
 }
 allow_ip = [ "87.117.10.45/32" ]
+env_file = "../.env"

@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/bin/bash -x
 
 DESTROY=0
+image_name="demo_app"
+image_release="0.0.1"
 
 # Выводит справку
 help() {
@@ -96,6 +98,28 @@ destroy(){
     terraform -chdir=sa destroy -auto-approve
 }
 
+build_image(){
+  if [ ! -d "app_demo" ];  then
+    git clone https://github.com/a148ru/app_demo.git
+  fi
+  REGISTRY_ENDPOINT="cr.yandex/$(terraform -chdir=infra output registry_endpoint)"
+  REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT//\"/}
+  IMAGE="/${image_name}:${image_release}"
+  if [ ! -z $REGISTRY_ENDPOINT ];  then
+    docker build -t "${REGISTRY_ENDPOINT}${IMAGE}" app_demo
+    docker push "${REGISTRY_ENDPOINT}${IMAGE}"
+  else
+    echo "Registry endpoint don't set - ERORR!!!"
+  fi
+}
+
+delete_image(){
+  registry=$(terraform -chdir=infra output registry_endpoint)
+  registry=${registry//\"/}
+  image_id=$(yc container image list --folder-id=$TF_VAR_folder_id | grep "${registry}/${image_name}" | awk '{print $2}')
+  yc container image delete $image_id
+}
+
 # Обрабатываем аргументов командной строки
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -135,7 +159,10 @@ fi
 
 if [ $DESTROY -eq 1 ]
 then
+  delete_image
   destroy
 else
   apply
+  build_image
 fi
+
