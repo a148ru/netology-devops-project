@@ -37,7 +37,7 @@ jobs:
       env:
         YC_TOKEN: ${{ secrets.YC_TOKEN }}
       run: |
-        yc config set token=$YC_TOKEN
+        ~/bin/yc config set token=$YC_TOKEN
         
     # Клонирование репозитория
     - name: Checkout code
