@@ -42,8 +42,6 @@ jobs:
       run: |
         export PATH="$PATH:$HOME/bin"
         yc config profile create deploy
-        yc config set cloud-id $TF_VAR_CLOUD_ID
-        yc config set folder-id $TF_VAR_FOLDER_ID
         yc config set token $YC_TOKEN
         
     # Клонирование репозитория
