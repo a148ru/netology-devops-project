@@ -1,0 +1,7 @@
+.env
+personal.auto.tfvars
+*.tfstate.backup
+/temp
+*.tfstate
+authorized_key.json
+sa_key.json

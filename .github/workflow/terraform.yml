@@ -1,0 +1,50 @@
+# Файл: .github/workflows/terraform.yml
+
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # Установка необходимых зависимостей
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y jq python3-pip
+        
+    # Установка Terraform
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.9.x
+        
+    # Установка Yandex Cloud CLI
+    - name: Install Yandex Cloud CLI
+      run: |
+        curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+        source ~/.bashrc
+        
+    # Авторизация в Yandex Cloud
+    - name: Authenticate with Yandex Cloud
+      env:
+        YC_TOKEN: ${{ secrets.YC_TOKEN }}
+      run: |
+        yc config set token=$YC_TOKEN
+        
+    # Клонирование репозитория
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    # Запуск bash-скрипта
+    - name: Run Terraform script
+      env:
+        TF_VAR_region: ${{ secrets.TF_VAR_REGION }}
+        TF_VAR_folder_id: ${{ secrets.TF_VAR_FOLDER_ID }}
+      run: |
+        chmod +x ./terraform-deploy.sh
+        ./terraform-deploy.sh
