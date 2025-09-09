@@ -26,7 +26,8 @@ jobs:
     - name: Install Yandex Cloud CLI
       run: |
         curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh -o ./install.sh
-        bash ./install.sh -i /bin
+        bash ./install.sh -i ~/
+        export PATH="$PATH:$HOME/bin"
         
     # Добавить yc d PATH
     #- name: Add yc to PATH
