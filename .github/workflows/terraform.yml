@@ -39,7 +39,10 @@ jobs:
       env:
         YC_TOKEN: ${{ secrets.YC_TOKEN }}
       run: |
-        ~/bin/yc config set token=$YC_TOKEN
+        yc config profile create deploy
+        yc config set cloud-id $TF_VAR_CLOUD_ID
+        yc config set folder-id $TF_VAR_FOLDER_ID
+        yc config set token $YC_TOKEN
         
     # Клонирование репозитория
     - name: Checkout code
