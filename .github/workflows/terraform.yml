@@ -9,6 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: env
     steps:
     # Установка необходимых зависимостей
     - name: Install dependencies
