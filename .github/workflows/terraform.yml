@@ -55,5 +55,6 @@ jobs:
         TF_VAR_folder_id: ${{ secrets.TF_VAR_FOLDER_ID }}
         TF_VAR_cloud_id: ${{ secrets.TF_VAR_CLOUD_ID }}
       run: |
+        export PATH="$PATH:$HOME/bin"
         chmod +x ./terraform-deploy.sh
         ./terraform-deploy.sh -a $HOME/authorized_key.json -f $TF_VAR_folder_id -c $TF_VAR_cloud_id
