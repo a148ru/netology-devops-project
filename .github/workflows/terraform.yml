@@ -30,19 +30,19 @@ jobs:
         bash ./install.sh -i ~/
         export PATH="$PATH:$HOME/bin"
         
-    # Добавить yc d PATH
-    #- name: Add yc to PATH
-    #  run: |
-    #    source ~/.bashrc
-    #    
+    # Добавить 
+    - name: Add yc to PATH
+      env:
+        YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
+      run: |
+        echo $YC_AUTH_KEY > $HOME/authorized_key.json
+        
     # Авторизация в Yandex Cloud
     - name: Authenticate with Yandex Cloud
-      env:
-        YC_TOKEN: ${{ secrets.YC_TOKEN }}
       run: |
         export PATH="$PATH:$HOME/bin"
         yc config profile create deploy
-        yc config set token $YC_TOKEN
+        yc config set service-account-key $HOME/authorized_key.json
         
     # Клонирование репозитория
     - name: Checkout code
@@ -56,4 +56,4 @@ jobs:
         TF_VAR_cloud_id: ${{ secrets.TF_VAR_CLOUD_ID }}
       run: |
         chmod +x ./terraform-deploy.sh
-        ./terraform-deploy.sh
+        ./terraform-deploy.sh -a $HOME/authorized_key.json -f $TF_VAR_folder_id -c $TF_VAR_cloud_id
