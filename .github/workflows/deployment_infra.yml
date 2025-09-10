@@ -36,6 +36,11 @@ jobs:
           echo $YC_AUTH_KEY > $HOME/authorized_key.json
           
       - name: Create Service Account
+        env:
+          TF_VAR_service_account_key_file: $HOME/authorized_key.json
+          TF_VAR_region: ${{ secrets.TF_VAR_REGION }}
+          TF_VAR_folder_id: ${{ secrets.TF_VAR_FOLDER_ID }}
+          TF_VAR_cloud_id: ${{ secrets.TF_VAR_CLOUD_ID }}
         id: create-sa
         run: |
           terraform -chdir=sa init
@@ -49,6 +54,7 @@ jobs:
   create-bucket:
     runs-on: ubuntu-latest
     environment: env
+    needs: [create-sa]
     outputs:
       bucket_name: ${{ steps.create-bucket.outputs.bucket_name }}
     steps:
@@ -70,6 +76,10 @@ jobs:
       - name: Add yc to PATH
         env:
           YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
+          TF_VAR_service_account_key_file: $HOME/authorized_key.json
+          TF_VAR_region: ${{ secrets.TF_VAR_REGION }}
+          TF_VAR_folder_id: ${{ secrets.TF_VAR_FOLDER_ID }}
+          TF_VAR_cloud_id: ${{ secrets.TF_VAR_CLOUD_ID }}
         run: |
           echo $YC_AUTH_KEY > $HOME/authorized_key.json
         
@@ -93,7 +103,7 @@ jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     environment: env
-    needs: [create-sa, create-bucket]
+    needs: [create-bucket]
     steps:
       - uses: actions/checkout@v3
       
@@ -116,6 +126,9 @@ jobs:
         env:
           YC_SA_KEY: ${{ needs.create-sa.outputs.sa_key }}
           BUCKET_NAME: ${{ needs.create-bucket.outputs.bucket_name }}
+          TF_VAR_region: ${{ secrets.TF_VAR_REGION }}
+          TF_VAR_folder_id: ${{ secrets.TF_VAR_FOLDER_ID }}
+          TF_VAR_cloud_id: ${{ secrets.TF_VAR_CLOUD_ID }}
         run: |
           terraform -chdir=infra init
           terraform -chdir=infra plan
