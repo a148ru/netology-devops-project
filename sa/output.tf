@@ -6,4 +6,5 @@ output "service_account_id" {
 
 output "service_account_key" {
   value = yandex_iam_service_account_key.sa-key
+  sensitive = true
 }
