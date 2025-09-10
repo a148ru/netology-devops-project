@@ -84,9 +84,9 @@ jobs:
       - name: Create Bucket
         id: create-bucket
         run: |
-          terraform chdir=bucket init
-          terraform chdir=bucket apply -auto-approve
-          bucket_name=$(terraform chdir=bucket output -raw bucket_name)
+          terraform -chdir=bucket init
+          terraform -chdir=bucket apply -auto-approve
+          bucket_name=$(terraform -chdir=bucket output -raw bucket_name)
           echo "::set-output name=bucket_name::$bucket_name"
 
   # Третий job - развертывание основной инфраструктуры
@@ -106,7 +106,7 @@ jobs:
         run: |
           curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           source ~/.bashrc
-          
+
       - name: Configure Backend
         run: |
           echo "bucket = ${{ needs.create-bucket.outputs.bucket_name }}" >> backend.tf
