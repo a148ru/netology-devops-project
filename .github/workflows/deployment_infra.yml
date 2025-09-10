@@ -34,7 +34,7 @@ jobs:
           YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
         run: |
           echo $YC_AUTH_KEY > $HOME/authorized_key.json
-          echo "auth_file=$HOME/authorized_key.json" >> sa/personal.auto.tfvars
+          echo "auth_file=\"$HOME/authorized_key.json\"" >> sa/personal.auto.tfvars
           
       - name: Create Service Account
         env:
