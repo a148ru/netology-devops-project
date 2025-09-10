@@ -55,5 +55,5 @@ resource "null_resource" "sa_key_file" {
 }
 
 resource "yandex_iam_service_account_key" "sa-key" {
-  service_account_id = yandex_iam_service_account.terraform-sa.id
+  service_account_id = yandex_iam_service_account.terraform_sa.id
 }
