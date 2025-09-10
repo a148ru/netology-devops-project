@@ -53,3 +53,7 @@ resource "null_resource" "sa_key_file" {
     command = "yc iam key create --folder-id ${var.folder_id} --service-account-id ${yandex_iam_service_account.terraform_sa.id} --output ${var.sa_file_key}"
   }
 }
+
+resource "yandex_iam_service_account_key" "sa-key" {
+  service_account_id = yandex_iam_service_account.terraform-sa.id
+}

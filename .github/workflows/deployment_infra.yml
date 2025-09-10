@@ -5,12 +5,13 @@ name: YC Infrastructure Deployment
 on:
   push:
     branches:
-      - test
+      - main
 
 jobs:
   # Первый job - создание сервисного аккаунта
   create-sa:
     runs-on: ubuntu-latest
+    environment: env
     outputs:
       sa_id: ${{ steps.create-sa.outputs.sa_id }}
       sa_key: ${{ steps.create-sa.outputs.sa_key }}
@@ -20,32 +21,34 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.x
+          terraform_version: 1.9.x
           
       - name: Install YC CLI
         run: |
-          curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          source ~/.bashrc
+          curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh -o ./install.sh
+          bash ./install.sh -i ~/
+          export PATH="$PATH:$HOME/bin"
           
-      - name: Authenticate with YC
+      - name: Add yc to PATH
         env:
-          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
         run: |
-          yc config set token=$YC_TOKEN
+          echo $YC_AUTH_KEY > $HOME/authorized_key.json
           
       - name: Create Service Account
         id: create-sa
         run: |
-          terraform init
-          terraform apply -auto-approve -target=yandex_iam_service_account
-          sa_id=$(terraform output -raw service_account_id)
-          sa_key=$(terraform output -raw service_account_key)
+          terraform -chdir=sa init
+          terraform -chdir=sa apply -auto-approve
+          sa_id=$(terraform -chdir=sa output -raw service_account_id)
+          sa_key=$(terraform -chdir=sa output -raw service_account_key)
           echo "::set-output name=sa_id::$sa_id"
           echo "::set-output name=sa_key::$sa_key"
 
   # Второй job - создание бакета
   create-bucket:
     runs-on: ubuntu-latest
+    environment: env
     outputs:
       bucket_name: ${{ steps.create-bucket.outputs.bucket_name }}
     steps:
@@ -54,30 +57,42 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.x
+          terraform_version: 1.9.x
           
-      - name: Install YC CLI
+      # Установка Yandex Cloud CLI
+      - name: Install Yandex Cloud CLI
         run: |
-          curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          source ~/.bashrc
+          curl -s https://storage.yandexcloud.net/yandexcloud-yc/install.sh -o ./install.sh
+          bash ./install.sh -i ~/
+          export PATH="$PATH:$HOME/bin"
           
-      - name: Authenticate with YC
+      # Добавить 
+      - name: Add yc to PATH
         env:
-          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
         run: |
-          yc config set token=$YC_TOKEN
+          echo $YC_AUTH_KEY > $HOME/authorized_key.json
+        
+      # Авторизация в Yandex Cloud
+      - name: Authenticate with Yandex Cloud
+        run: |
+          export PATH="$PATH:$HOME/bin"
+          yc config profile create deploy
+          yc config set service-account-key $HOME/authorized_key.json
+        
           
       - name: Create Bucket
         id: create-bucket
         run: |
-          terraform init
-          terraform apply -auto-approve -target=yandex_storage_bucket
-          bucket_name=$(terraform output -raw bucket_name)
+          terraform chdir=bucket init
+          terraform chdir=bucket apply -auto-approve
+          bucket_name=$(terraform chdir=bucket output -raw bucket_name)
           echo "::set-output name=bucket_name::$bucket_name"
 
   # Третий job - развертывание основной инфраструктуры
   deploy-infra:
     runs-on: ubuntu-latest
+    environment: env
     needs: [create-sa, create-bucket]
     steps:
       - uses: actions/checkout@v3
@@ -85,7 +100,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.x
+          terraform_version: 1.9.x
           
       - name: Install YC CLI
         run: |
@@ -102,6 +117,6 @@ jobs:
           YC_SA_KEY: ${{ needs.create-sa.outputs.sa_key }}
           BUCKET_NAME: ${{ needs.create-bucket.outputs.bucket_name }}
         run: |
-          terraform init
-          terraform plan
-          terraform apply -auto-approve
+          terraform -chdir=infra init
+          terraform -chdir=infra plan
+          terraform -chdir=infra apply -auto-approve

@@ -4,11 +4,13 @@
 output "private_key" {
   value = yandex_iam_service_account_key.terraform_sa_key.private_key
   sensitive = true
+} */
+
+output "service_account_id" {
+  value = yandex_iam_service_account.terraform_sa.id
 }
-output "sa_id" {
-  value = "${yandex_iam_service_account.terraform_sa.id}"
-}
-output "static_id_key" {
+
+/* output "static_id_key" {
   value = yandex_iam_service_account_static_access_key.terraform_sa_static_key.id
 }
 output "static_access_key" {
@@ -18,3 +20,7 @@ output "static_secret_key" {
   value = yandex_iam_service_account_static_access_key.terraform_sa_static_key.secret_key
   sensitive = true
 } */
+
+output "service_account_key" {
+  value = yandex_iam_service_account_key.sa-key
+}
