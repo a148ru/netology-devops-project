@@ -4,7 +4,7 @@ name: YC Infrastructure Deploymen
 on:
   push:
     branches:
-      - main  
+      - test  
 jobs:
   # Первый job - создание сервисного аккаунта
   create-sa:
