@@ -53,9 +53,9 @@ resource "yandex_kubernetes_node_group" "ng-1" {
       zone = var.default_zone.c
     }
   }
-  node_taints = ["taint1=taint-value1:NoSchedule"]
-  labels = {
-    "label1" = "value1"
-  }
-  allowed_unsafe_sysctls = ["kernel.msg*", "net.core.somaxconn"]
+  # node_taints = ["taint1=taint-value1:NoSchedule"]
+  # labels = {
+  #   "my-label" = "value1"
+  # }
+  # allowed_unsafe_sysctls = ["kernel.msg*", "net.core.somaxconn"]
 }

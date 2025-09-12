@@ -102,8 +102,8 @@ build_image(){
   if [ ! -d "app_demo" ];  then
     git clone https://github.com/a148ru/app_demo.git
   fi
-  REGISTRY_ENDPOINT="cr.yandex/$(terraform -chdir=infra output registry_endpoint)"
-  REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT//\"/}
+  REGISTRY_ENDPOINT="cr.yandex/$(terraform -chdir=infra output -raw registry_endpoint)"
+  # REGISTRY_ENDPOINT=${REGISTRY_ENDPOINT//\"/}
   IMAGE="/${image_name}:${image_release}"
   if [ ! -z $REGISTRY_ENDPOINT ];  then
     docker build -t "${REGISTRY_ENDPOINT}${IMAGE}" app_demo
@@ -161,8 +161,20 @@ if [ $DESTROY -eq 1 ]
 then
   delete_image
   destroy
+  kubectl delete --ignore-not-found=true -f manifests/ -f manifests/setup
 else
   apply
   build_image
+
+  kubectl create ns monitoring
+# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# helm repo update
+  git clone https://github.com/prometheus-operator/kube-prometheus.git
+  cd kube-prometheus
+
+  kubectl apply --server-side -f manifests/setup
+  kubectl wait --for condition=Established --all CustomResourceDefinition --namespace=monitoring
+  kubectl apply -f manifests/
 fi
+
 
