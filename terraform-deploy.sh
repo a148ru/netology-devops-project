@@ -107,9 +107,9 @@ build_image(){
   IMAGE="/${image_name}:${image_release}"
   if [ ! -z $REGISTRY_ENDPOINT ];  then
     docker build -t "${REGISTRY_ENDPOINT}${IMAGE}" app_demo
-    if docker push "${REGISTRY_ENDPOINT}${IMAGE}"; then
-      sed -i"s/nginx:latest/${REGISTRY_ENDPOINT}${IMAGE}/" ./app/app-demo.yml
-    fi
+    docker push "${REGISTRY_ENDPOINT}${IMAGE}"
+    sed -i "s|image:.*|image: $REGISTRY_ENDPOINT$IMAGE|g" ./infra/app/app_demo.yml
+
   else
     echo "Registry endpoint don't set - ERORR!!!"
   fi

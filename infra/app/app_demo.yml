@@ -2,36 +2,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app_demo_deployment
+  name: app-demo-deployment
   labels:
-    app: app_demo
+    app: app-demo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: app_demo
+      app: app-demo
   template:
     metadata:
       labels:
-        app: app_demo
+        app: app-demo
     spec:
       containers:
-      - name: app_demo
-        image: nginx:latest
+      - name: app-demo
+        image: cr.yandex/crppqi6tfv23hnubsg5t/demo_app:0.0.1
         ports:
           - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: app_demo_svc
+  name: app-demo-svc
   namespace: default
 spec:
   ports:
   - name: web
-    port: 8080
-    protocol: TCP
-    targetPort: 80
+    port: 80
+    targetPort: http
   selector:
     app: app_demo
   type: LoadBalancer
