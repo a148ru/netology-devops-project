@@ -18,20 +18,20 @@ platform = {
 vm_param = {
     test = ({
       cores = 2,
-      memory = 1,
+      memory = 4,
       core_fract = 20
     })
 }
 user_name = "ubuntu"
-k8s_version = "1.32"
+k8s_version = "1.30"
 node_resource = {
     "cores" = 2
-    "core_fraction" = 50
-    "memory" = 2
+    "core_fraction" = 20
+    "memory" = 4
     "disk_size" = 64
 }
 cluster = {
     region = "ru-central1"
 }
-allow_ip = [ "87.117.10.45/32" ]
+allow_ip = [ "0.0.0.0/0" ]
 env_file = "../.env"

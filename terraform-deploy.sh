@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 DESTROY=0
 image_name="demo_app"
@@ -107,7 +107,9 @@ build_image(){
   IMAGE="/${image_name}:${image_release}"
   if [ ! -z $REGISTRY_ENDPOINT ];  then
     docker build -t "${REGISTRY_ENDPOINT}${IMAGE}" app_demo
-    docker push "${REGISTRY_ENDPOINT}${IMAGE}"
+    if docker push "${REGISTRY_ENDPOINT}${IMAGE}"; then
+      sed -i"s/nginx:latest/${REGISTRY_ENDPOINT}${IMAGE}/" ./app/app-demo.yml
+    fi
   else
     echo "Registry endpoint don't set - ERORR!!!"
   fi
@@ -161,7 +163,7 @@ if [ $DESTROY -eq 1 ]
 then
   delete_image
   destroy
-  kubectl delete --ignore-not-found=true -f manifests/ -f manifests/setup
+
 else
   apply
   build_image
@@ -169,12 +171,16 @@ else
   kubectl create ns monitoring
 # helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 # helm repo update
-  git clone https://github.com/prometheus-operator/kube-prometheus.git
-  cd kube-prometheus
+  if [! -d "kube-prometheus" ]; then
+    git clone https://github.com/prometheus-operator/kube-prometheus.git
+  fi
+
+  cd monitoring
 
   kubectl apply --server-side -f manifests/setup
   kubectl wait --for condition=Established --all CustomResourceDefinition --namespace=monitoring
   kubectl apply -f manifests/
+  kubectl apply -f ../infra/app/app_demo.yml
 fi
 
 

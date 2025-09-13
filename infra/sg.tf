@@ -53,3 +53,4 @@ resource "yandex_vpc_security_group" "cluster" {
     to_port           = 65535
   }
 }
+

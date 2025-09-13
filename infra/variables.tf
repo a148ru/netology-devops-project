@@ -12,13 +12,13 @@ variable "storage_id" {
   type = string
 }
 
-variable "static_access_key" {
+/* variable "static_access_key" {
   type = string
 }
 
 variable "static_secret_key" {
   type = string
-}
+} */
 
 variable "auth_file" {
   type = string
@@ -75,4 +75,12 @@ variable "allow_ip" {
 }
 variable "env_file" {
   type = string
+}
+variable "ssh_key_file" {
+  type = string
+  default = "~/.ssh/id_ed25519.pub"
+}
+variable "user" {
+  type = string
+  default = "tester"
 }

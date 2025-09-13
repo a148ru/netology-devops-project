@@ -31,7 +31,7 @@ jobs:
         export PATH="$PATH:$HOME/bin"
         
     # Добавить 
-    - name: Add yc to PATH
+    - name: Create auth file
       env:
         YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
       run: |

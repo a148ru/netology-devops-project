@@ -9,9 +9,7 @@ terraform {
     endpoints = {
       s3 = "https://storage.yandexcloud.net"
     }
-    #access_key = var.astatic_access_key
-    #secret_key = var.static_secret_key
-    #bucket = var.storage_id
+
     region = "ru-central1"
     key    = "terraform.tfstate"
 
