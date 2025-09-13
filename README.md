@@ -112,10 +112,16 @@ spec:
     app.kubernetes.io/part-of: kube-prometheus
   type: LoadBalancer
 ```
+Тестовое приложение и grafana доступны по портам 80 с внешними ip-адресами
+
 ![80](image-7.png)
 ![alt text](image-10.png)
 ![alt text](image-8.png)
 ![alt text](image-9.png)
+
+Настроен workflow на пуш в ветку main
+
+![alt text](image-11.png)
 
 
 ### Установка и настройка CI/CD
