@@ -169,11 +169,6 @@ else
   build_image
 
   kubectl create ns monitoring
-# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-# helm repo update
-  if [! -d "kube-prometheus" ]; then
-    git clone https://github.com/prometheus-operator/kube-prometheus.git
-  fi
 
   cd monitoring
 

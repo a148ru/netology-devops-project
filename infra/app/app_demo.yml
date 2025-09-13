@@ -2,35 +2,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-demo-deployment
+  name: app-deployment
   labels:
-    app: app-demo
+    app: netology
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      app: app-demo
+      app: netology
   template:
     metadata:
       labels:
-        app: app-demo
+        app: netology
     spec:
       containers:
       - name: app-demo
-        image: cr.yandex/crppqi6tfv23hnubsg5t/demo_app:0.0.1
+        image: cr.yandex/crppqi6tfv23hnubsg5t/demo_app:0.0.5
         ports:
-          - containerPort: 80
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-demo-svc
-  namespace: default
+  name: app-service
+  labels:
+    app: netology
 spec:
-  ports:
-  - name: web
-    port: 80
-    targetPort: http
-  selector:
-    app: app_demo
   type: LoadBalancer
+  selector:
+    app: netology
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
