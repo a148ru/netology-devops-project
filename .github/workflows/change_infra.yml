@@ -27,7 +27,7 @@ jobs:
         run: |
           curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
           chmod +x ./kubectl
-          mkdir $/HOME/bin
+          mkdir $HOME/bin
           mv ./kubectl $HOME/bin/kubectl
           kubectl version --client
 
