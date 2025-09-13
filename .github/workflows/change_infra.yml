@@ -41,7 +41,7 @@ jobs:
           echo $SSH_KEY_PUB > $HOME/id_ed25519.pub
           yc config profile create sa
           yc config profile activate sa
-          yc config set token $HOME/authorized_key.json
+          yc config set service-account-key $HOME/authorized_key.json
     
       - name: Deploy Infrastructure
         env:
