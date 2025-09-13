@@ -2,8 +2,8 @@
 
 ### Подготовка
 
-Для развертываня проекта потребуются программы:
-- terraform версии 1.9.X
+Для автоматического развертывания проекта необходимы программы:
+- terraform версии 1.9.X [!https://developer.hashicorp.com/terraform/install]
 - yc
 - kubectl
 - git

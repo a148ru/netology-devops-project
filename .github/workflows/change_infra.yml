@@ -30,6 +30,8 @@ jobs:
         run: |
           echo $YC_AUTH_KEY > $HOME/authorized_key.json
           echo $SSH_KEY_PUB > $HOME/id_ed25519.pub
+          yc create profile sa
+          yc config set token $HOME/authorized_key.json
     
       - name: Deploy Infrastructure
         env:
