@@ -28,12 +28,11 @@ jobs:
           YC_AUTH_KEY: ${{ secrets.YC_TOKEN }}
           SSH_KEY_PUB: ${{ secrets.SSH_KEY }}
         run: |
-          echo $YC_AUTH_KEY > authorized_key.json
-          echo $SSH_KEY_PUB > id_ed25519.pub
+          echo $YC_AUTH_KEY > $HOME/authorized_key.json
+          echo $SSH_KEY_PUB > $HOME/id_ed25519.pub
     
       - name: Deploy Infrastructure
         env:
-          TF_VAR_auth_file: "authorized_key.json"
           TF_VAR_region: ${{ secrets.TF_VAR_REGION }}
           TF_VAR_folder_id: ${{ secrets.TF_VAR_FOLDER_ID }}
           TF_VAR_cloud_id: ${{ secrets.TF_VAR_CLOUD_ID }}
@@ -42,9 +41,9 @@ jobs:
           TF_VAR_static_id_key: ${{ secrets.TF_VAR_STATIC_ID_KEY }}
           TF_VAR_static_access_key: ${{ secrets.TF_VAF_STATIC_ACCESS_KEY }}
           TF_VAR_static_secret_key: ${{ secrets.TF_VAR_STATIC_SECRET_KEY }}
-          TF_VAR_ssh_key_file: "id_ed25519.pub"
-
         run: |
+          export TF_VAR_auth_file="$HOME/authorized_key.json"
+          export TF_VAR_ssh_key_file="$HOME/id_ed25519.pub"
           terraform -chdir=infra init -backend-config="access_key=$TF_VAR_static_access_key" -backend-config="secret_key=$TF_VAR_static_secret_key" -backend-config="bucket=$TF_VAR_storage_id" -reconfigure
           terraform -chdir=infra init
           terraform -chdir=infra plan
