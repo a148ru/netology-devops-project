@@ -128,7 +128,7 @@ spec:
 
 для деплоя приложения используется Github Action
 
-1. workflow при коммите в ветку main
+#### 1. workflow при коммите в ветку main
 
 ![alt text](image-12.png)
 
@@ -136,9 +136,14 @@ spec:
 
 ![alt text](image-13.png)
 
-2. workflow при создании тега
+#### 2. workflow при создании тега
+добавилил тег
 ![alt text](image-15.png)
+github action
 ![alt text](image-14.png)
+выполнено
 ![alt text](image-16.png)
+в registry есть нужный image
 ![alt text](image-17.png)
+deployment использует новую версию приложения 
 ![alt text](image-18.png)
