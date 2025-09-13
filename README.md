@@ -128,3 +128,17 @@ spec:
 
 для деплоя приложения используется Github Action
 
+1. workflow при коммите в ветку main
+
+![alt text](image-12.png)
+
+Отправка в registry
+
+![alt text](image-13.png)
+
+2. workflow при создании тега
+![alt text](image-15.png)
+![alt text](image-14.png)
+![alt text](image-16.png)
+![alt text](image-17.png)
+![alt text](image-18.png)
