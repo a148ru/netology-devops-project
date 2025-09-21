@@ -44,7 +44,7 @@ $ ./terraform-deploy.sh -a <authorized_key in json> -c <cloud_id> -f <folder_id>
 
 Стейт основной конфигурации сохраняется в бакете
 
-![alt text](image.png)
+![alt text](img/image.png)
 
 ```
 terraform {
@@ -74,17 +74,17 @@ terraform {
 ### Создание Kubernetes кластера
 
 В качестве кластера kubernetes используется сервис Yandex Managed Service for Kubernetes с региональным мастером и тремя нодами в разных зонах доступности.
-![alt text](image-1.png)
-![alt text](image-2.png)
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
+![alt text](img/image-1.png)
+![alt text](img/image-2.png)
+![alt text](img/image-3.png)
+![alt text](img/image-4.png)
+![alt text](img/image-5.png)
 
 ### Создание тестового приложения
 
 Создано тестовое приложение https://github.com/a148ru/app_demo
 Собраный docker image хранится в Yandex Container Registry (часть основной инфраструктуры)
-![alt text](image-6.png)
+![alt text](img/image-6.png)
 
 ### Подготовка cистемы мониторинга и деплой приложения
 
@@ -115,13 +115,13 @@ spec:
 Тестовое приложение и grafana доступны по портам 80 с внешними ip-адресами
 
 ![80](image-7.png)
-![alt text](image-10.png)
-![alt text](image-8.png)
-![alt text](image-9.png)
+![alt text](img/image-10.png)
+![alt text](img/image-8.png)
+![alt text](img/image-9.png)
 
 Настроен workflow на пуш в ветку main
 
-![alt text](image-11.png)
+![alt text](img/image-11.png)
 
 
 ### Установка и настройка CI/CD
@@ -130,20 +130,20 @@ spec:
 
 #### 1. workflow при коммите в ветку main
 
-![alt text](image-12.png)
+![alt text](img/image-12.png)
 
 Отправка в registry
 
-![alt text](image-13.png)
+![alt text](img/image-13.png)
 
 #### 2. workflow при создании тега
 добавилил тег
-![alt text](image-15.png)
+![alt text](img/image-15.png)
 github action
-![alt text](image-14.png)
+![alt text](img/image-14.png)
 выполнено
-![alt text](image-16.png)
+![alt text](img/image-16.png)
 в registry есть нужный image
-![alt text](image-17.png)
+![alt text](img/image-17.png)
 deployment использует новую версию приложения 
-![alt text](image-18.png)
+![alt text](img/image-18.png)
