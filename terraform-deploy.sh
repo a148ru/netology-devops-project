@@ -143,11 +143,7 @@ else
     TF_VAR_auth_file="$(pwd)/$file_name"
 fi
 
-# Проверяем существование файла
-if [ ! -f "$TF_VAR_auth_file" ]; then
-    echo "Ошибка: файл не найден по пути '$TF_VAR_auth_file'"
-    exit 1
-fi
+
 
 # Проверяем переменные
 
@@ -157,6 +153,12 @@ then
   echo "Необходимо указать параметры!"
   echo ""
   help
+fi
+
+# Проверяем существование файла
+if [ ! -f "$TF_VAR_auth_file" ]; then
+    echo "Ошибка: файл не найден по пути '$TF_VAR_auth_file'"
+    exit 1
 fi
 
 if [ $DESTROY -eq 1 ]

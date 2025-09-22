@@ -1,149 +1,98 @@
 ## Итоговый проект по курсу DevOps Netology a148ru
 
-## Как развернуть проект
-#### Подготовка
+### Назначение
 
-Для автоматического развертывания проекта необходимы программы:
+Проект выполнен в рамках дипломного практикума Yandex.Cloud при прохождении курса DevOps-инженер [образовательной платформы Нетология](https://netology.ru)
+
+### Цели проекта
+
+- Подготовить облачную инфраструктуру на базе облачного провайдера Яндекс.Облако.
+- Запустить и сконфигурировать Kubernetes кластер.
+- Установить и настроить систему мониторинга.
+- Настроить и автоматизировать сборку тестового приложения с использованием Docker-контейнеров.
+- Настроить CI для автоматической сборки и тестирования.
+- Настроить CD для автоматического развёртывания приложения.
+
+### Зависимости и инструменты
+
+Для развертывания проекта:
+1. Следующие программы должны быть установлены и сконфигурированы:
 - [terraform версии 1.9.X](https://developer.hashicorp.com/terraform/install)
 - [yc cli](https://yandex.cloud/ru/docs/cli/operations/install-cli)
 - [kubectl](https://kubernetes.io/ru/docs/tasks/tools/install-kubectl/)
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-у вас уже должно быть зарегистрировано облако в Yandex Cloud и создан каталог для проекта. 
+2. Должно быть зарегистрировано облако в Yandex.Cloud и создан каталог в облаке для проекта.
+3. Проект придусматривает, что у вас есть сервисный  аккаунт с авторизованными ключами и с необходимыми правами, для создания других сервисных аккаунтов и назначения им прав на каталог облака.
 
-#### Запуск проекта
- 
-Для развертывания проекта склонируйте проект с помощью git
+### Запуск проекта
+
+Клонировать проект с помощью git
 
 $ `git clone https://github.com/a148ru/netology-devops-project.git`
 
-Выполните
+Перейти в каталог проекта и запустить скрипт с необходимыми параметрами
 
 ```
 $ cd netology-dev-project
 $ ./terraform-deploy.sh -a <authorized_key in json> -c <cloud_id> -f <folder_id>`
 ```
+где:
+`<authorized_key in json>` - путь к файлу с авторизованными ключами административного сервисного аккаунта
+`<cloud_id>` - ID облака Yandex.Cloud
+`<folder_id>` - ID каталога в облаке Yandex.Cloud
 
 
+------------------------------------
 
 ## Описание выполнения проекта
 
 
 Проект состоит из трех частей, две предварительные и одна основная.
-Предварительные:
-- подготовка сервисного аккаунта с минимально необходимыми правами для развертывания основной части инфраструктуры
+
+1. **Предварительные**:
+- подготовка сервисного аккаунта с минимально необходимыми правами для выполнения основной части по созданию инфраструктуры
 - создание бакета для хранения стейта основной инфраструктуры
-Основная:
+
+2. **Основная**:
 - развертывание основной инфраструктуры
 
 
 
-## Этапы выполнения
+#### Процесс выполнения 
 
-### Создание облачной инфраструктуры
+![Alt text](./img/diag.svg)
 
-Стейт основной конфигурации сохраняется в бакете
-
-![alt text](img/image.png)
+1. Скрипт `terraform-deploy.sh` проверяет переменные окружения:
 
 ```
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-
-  backend "s3" {
-    endpoints = {
-      s3 = "https://storage.yandexcloud.net"
-    }
-
-    region = "ru-central1"
-    key    = "terraform.tfstate"
-
-    skip_region_validation      = true
-    skip_credentials_validation = true
-    skip_requesting_account_id  = true # Необходимая опция Terraform для версии 1.6.1 и старше.
-    skip_s3_checksum            = true # Необходимая опция при описании бэкенда для Terraform версии 1.6.3 и старше.
-
-  }
-}
+$TF_VAR_auth_file     # полный путь к файлу с авторизованными ключами
+$TF_VAR_cloud_id      # id облака
+$TF_VAR_folder_id     # id каталога в облаке
 ```
+>[!NOTE]
+>Если переменные на заданы, при запуске скрипта, необходимо передать значения параметров с соответствующими ключами.
 
-### Создание Kubernetes кластера
+2. Создается сервисный аккаунт с седующими правами на каталог:
+- `editor`
+- `k8s.clusters.agent`
+- `vpc.publicAdmin`
+- `container-registry.admin`
 
-В качестве кластера kubernetes используется сервис Yandex Managed Service for Kubernetes с региональным мастером и тремя нодами в разных зонах доступности.
-![alt text](img/image-1.png)
-![alt text](img/image-2.png)
-![alt text](img/image-3.png)
-![alt text](img/image-4.png)
-![alt text](img/image-5.png)
+и ключи, статический ключ доступа для бакета и авторизованный для дальнейшей работы с инфраструктурой и кластером.
+В результате будут созданы три файла 
+- `.env` в корне проекта, содержащем переменные окружения
+  * `TF_VAR_sa_id`
+  * `TF_VAR_static_id_key`
+  * `TF_VAR_static_access_key`
+  * `TF_VAR_static_secret_key`
+- `sa_key.json` - содержащий авторизованный ключ для созданного сервисного аккаунта
+- `personal.auto.tfvars` с данными для работы terraform в каталоге bucket
 
-### Создание тестового приложения
+3. Создается бакет с случайным постфиксом в имени и сервисному аккаунту, созданному на прошлом шаге назначаются права `storage.editor` на созданный бакет. В файл .env добавляется переменная окружения с именем бакета `TF_VAR_storage_id`. Создается  файл `personal.auto.tfvars` в каталоге infra с неодходимыми параметрами для дальнейшей работы terraform при создании инфраструктуры.
 
-Создано тестовое приложение https://github.com/a148ru/app_demo
-Собраный docker image хранится в Yandex Container Registry (часть основной инфраструктуры)
-![alt text](img/image-6.png)
+4. 
 
-### Подготовка cистемы мониторинга и деплой приложения
+## Отчет по выполнению работы
 
-Используется пакет kube-prometheus, собрана конфигурация по умолчанию, после чего внесены изменения в файл сервиса grafana (тип и порт)
-grafana-service.yaml
-```
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/component: grafana
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/part-of: kube-prometheus
-    app.kubernetes.io/version: 12.1.0
-  name: grafana
-  namespace: monitoring
-spec:
-  ports:
-  - name: http
-    port: 80
-    targetPort: http
-  selector:
-    app.kubernetes.io/component: grafana
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/part-of: kube-prometheus
-  type: LoadBalancer
-```
-Тестовое приложение и grafana доступны по портам 80 с внешними ip-адресами
-
-![80](image-7.png)
-![alt text](img/image-10.png)
-![alt text](img/image-8.png)
-![alt text](img/image-9.png)
-
-Настроен workflow на пуш в ветку main
-
-![alt text](img/image-11.png)
-
-
-### Установка и настройка CI/CD
-
-для деплоя приложения используется Github Action
-
-#### 1. workflow при коммите в ветку main
-
-![alt text](img/image-12.png)
-
-Отправка в registry
-
-![alt text](img/image-13.png)
-
-#### 2. workflow при создании тега
-добавилил тег
-![alt text](img/image-15.png)
-github action
-![alt text](img/image-14.png)
-выполнено
-![alt text](img/image-16.png)
-в registry есть нужный image
-![alt text](img/image-17.png)
-deployment использует новую версию приложения 
-![alt text](img/image-18.png)
+Отчет о выполнении работы с снимками экрана в файле [REPORT.md](./REPORT.md)
