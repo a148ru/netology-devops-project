@@ -38,9 +38,9 @@ $ cd netology-dev-project
 $ ./terraform-deploy.sh -a <authorized_key in json> -c <cloud_id> -f <folder_id>`
 ```
 где:
-`<authorized_key in json>` - путь к файлу с авторизованными ключами административного сервисного аккаунта
-`<cloud_id>` - ID облака Yandex.Cloud
-`<folder_id>` - ID каталога в облаке Yandex.Cloud
+- `<authorized_key in json>` - путь к файлу с авторизованными ключами административного сервисного аккаунта
+- `<cloud_id>` - ID облака Yandex.Cloud
+- `<folder_id>` - ID каталога в облаке Yandex.Cloud
 
 
 ------------------------------------
@@ -91,7 +91,42 @@ $TF_VAR_folder_id     # id каталога в облаке
 
 3. Создается бакет с случайным постфиксом в имени и сервисному аккаунту, созданному на прошлом шаге назначаются права `storage.editor` на созданный бакет. В файл .env добавляется переменная окружения с именем бакета `TF_VAR_storage_id`. Создается  файл `personal.auto.tfvars` в каталоге infra с неодходимыми параметрами для дальнейшей работы terraform при создании инфраструктуры.
 
-4. 
+4. Создание регионального кластера Kubernetes с использованием *Yandex Managed Service for Kubernetes*, создание группы узлов (Node Group) и группы безопасности (Security Group, SG). Создается файл конфигурации для работы `kubectl`. Создание хранилища образов docker - *Yandex Container Registry*
+
+5. Разворачивается ситема мониторинга на основе пакета [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus), с доступом к Grafana по 80 порту сетевого балансировщика нагрузки ([Network Load Balancer, NLB](https://yandex.cloud/ru/docs/network-load-balancer/concepts/)).
+
+6. Клонирование тестового приложения, сборка docker-образа, публикация образа в подготовленное хранилище и деплой приложения в кластер Kubernetes с доступом к по 80 порту сетевого балансировщика нагрузки.
+
+#### CI/CD
+
+В качестве CI/CD системы был использован GitHub Action
+
+1. Инфраструктура
+Pipeline настроен на работу при любом коммите в основную ветку main. Для корректной работы, должны быть заданы следующие переменные окружения (Enviroment secrets):
+```
+SSH_KEY                     # ssh ключ для подключения к нодам 
+TF_VAR_CLOUD_ID             # id облака
+TF_VAR_FOLDER_ID            # id каталога в облаке
+TF_VAR_REGION               # регион, обычно ru-central1
+TF_VAR_SA_ID                # id сервисного аккаунта
+TF_VAR_STATIC_ID_KEY        # id статического ключа сервисного аккаунта
+TF_VAR_STATIC_ACCESS_KEY    # идентификатор статического ключ сервисного аккаунта
+TF_VAR_STATIC_SECRET_KEY    # секретный ключ статического ключа сервисного аккаунта
+TF_VAR_STORAGE_ID           # имя бакета, где расположен стейт terraform
+YC_TOKEN                    # авторизованный ключ сервисного аккаунта
+```
+
+
+2. Тестовое приложение
+Для [тестового приложения](https://github.com/a148ru/app_demo/tree/main/.github/workflows) используются два pipeline, файлы [commit.yml](https://github.com/a148ru/app_demo/blob/main/.github/workflows/commit.yml) и [deploy.yml](https://github.com/a148ru/app_demo/blob/main/.github/workflows/deploy.yml). Соответственно первый выполняет сборку и публикацию образа при коммите в основную ветку main, второй работает при создании нового тега и релиза приложения, собирая и публикуя образ, выполняет его деплой в кластер Kubernetes.
+Для корректной работы pipeline, должны быть заданы следующие переменные окружения:
+```
+K8S_ID                      # id кластера в сервисе Yandex Managed Service for Kubernetes
+KUBECONFIG_DATA             # файл конфигурации kubectl в base64
+YC_SA_KEY                   # авторизованный ключ сервисного аккаунта с правами на хранилище Yandex Container Registry и кластер  Yandex Managed Service
+```
+
+
 
 ## Отчет по выполнению работы
 
