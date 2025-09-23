@@ -1,5 +1,5 @@
 resource "yandex_vpc_security_group" "cluster" {
-  name        = "cluster"
+  name        = var.sg_name
   description = "Правила группы обеспечивают базовую работоспособность кластера Managed Service for Kubernetes. Примените ее к кластеру и группам узлов."
   network_id  = yandex_vpc_network.develop.id
   

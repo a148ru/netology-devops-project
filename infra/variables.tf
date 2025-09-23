@@ -84,3 +84,66 @@ variable "user" {
   type = string
   default = "tester"
 }
+variable "master_resource" {
+  type = string
+  default = "s-c2-m8"
+}
+variable "kms_key" {
+  type = map(string)
+  default = {
+    "name" = "kms-key"
+    "algorithm" = "AES_128"
+    "rotation" = "8760h" # 1 год
+  }
+}
+variable "sg_name" {
+  type = string
+  default = "sg"
+}
+variable "registry_labels" {
+  type = map(string)
+}
+variable "node_group" {
+  type = map(string)
+  default = {
+    name = "ng"
+    instance_name_prefix = "instance"
+    disk_type = "network-ssd"
+    network_acceleration_type = "standard"
+  }
+}
+variable "node_nat" {
+  type = bool
+  default = true
+}
+variable "maintenance_window" {
+  type = map(string)
+  default = {
+    start_time = "22:00"
+    duration   = "10h"
+  }
+}
+variable "scale_policy" {
+  type = map(number)
+  default = {
+    size = 3
+  }
+}
+variable "deploy_policy" {
+  type = map(number)
+  default = {
+    max_expansion   = 5
+    max_unavailable = 2
+  }
+}
+variable "maintenance_policy" {
+  type = map(bool)
+  default = {
+    auto_upgrade = true
+    auto_repair  = true
+  }
+}
+variable "master_public_ip" {
+  type = bool
+  default = true
+}

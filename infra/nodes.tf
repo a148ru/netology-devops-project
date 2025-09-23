@@ -1,10 +1,10 @@
 resource "yandex_kubernetes_node_group" "ng-1" {
-  name        = "ng"
+  name        = var.node_group.name
   description = "Node group"
   cluster_id  = yandex_kubernetes_cluster.cluster.id
   version     = var.k8s_version
   instance_template {
-    name = "instance-{instance.short_id}-{instance_group.id}"
+    name = "${var.node_group.instance_name_prefix}-{instance.short_id}-{instance_group.id}"
     platform_id = var.platform.3
     resources {
       cores         = var.node_resource.cores
@@ -13,13 +13,13 @@ resource "yandex_kubernetes_node_group" "ng-1" {
     }
     boot_disk {
       size = var.node_resource.disk_size
-      type = "network-ssd"
+      type = var.node_group.disk_type
     }
-    network_acceleration_type = "standard"
+    network_acceleration_type = var.node_group.network_acceleration_type
     network_interface {
       security_group_ids = [yandex_vpc_security_group.cluster.id]
       subnet_ids         = [yandex_vpc_subnet.develop["a"].id, yandex_vpc_subnet.develop["b"].id, yandex_vpc_subnet.develop["c"].id]
-      nat                = true
+      nat                = var.node_nat
     }
     scheduling_policy {
       preemptible = true
@@ -31,19 +31,19 @@ resource "yandex_kubernetes_node_group" "ng-1" {
   }
   scale_policy {
     fixed_scale {
-      size = 3
+      size = var.scale_policy.size
     }
   }
   deploy_policy {
-    max_expansion   = 5
-    max_unavailable = 2
+    max_expansion   = var.deploy_policy.max_expansion
+    max_unavailable = var.deploy_policy.max_unavailable
   }
   maintenance_policy {
-    auto_upgrade = true
-    auto_repair  = true
+    auto_upgrade = var.maintenance_policy.auto_upgrade
+    auto_repair  = var.maintenance_policy.auto_repair
     maintenance_window {
-      start_time = "22:00"
-      duration   = "10h"
+      start_time = var.maintenance_window.start_time
+      duration   = var.maintenance_window.duration
     }
   }
   allocation_policy {

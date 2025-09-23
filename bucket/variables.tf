@@ -15,3 +15,10 @@ variable "env_file" {
 variable "auth_file" {
   type = string
 }
+variable "bucket_name_prefix" {
+  type = string
+}
+variable "storage_class"{
+  type = string
+  default = "standard"
+}

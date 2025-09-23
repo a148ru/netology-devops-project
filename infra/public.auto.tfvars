@@ -35,3 +35,7 @@ cluster = {
 }
 allow_ip = [ "0.0.0.0/0" ]
 env_file = "../.env"
+sg_name = "cluster"
+registry_labels = {
+  project = "netology"
+}

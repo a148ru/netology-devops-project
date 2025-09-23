@@ -2,10 +2,10 @@ resource "random_id" "bucket" {
   byte_length = 8
 }
 resource "yandex_storage_bucket" "terraform_state" {
-  bucket = "terraform-state-${random_id.bucket.hex}"
+  bucket = "${var.bucket_name_prefix}-${random_id.bucket.hex}"
   folder_id = var.folder_id
   
-  default_storage_class = "standard"
+  default_storage_class = var.storage_class
 
   anonymous_access_flags {
     read = false

@@ -1,9 +1,7 @@
 resource "yandex_container_registry" "registry" {
   name = var.registry_name
   folder_id = var.folder_id
-  labels = {
-    project = "netology"
-  }
+  labels = var.registry_labels
 }
 /* resource "yandex_container_registry_ip_permission" "allow-ip" {
   registry_id = yandex_container_registry.registry.id

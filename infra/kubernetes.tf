@@ -19,11 +19,11 @@ master {
     }
   
   version = var.k8s_version
-  public_ip = true
+  public_ip = var.master_public_ip
   
   scale_policy {
     auto_scale {
-      min_resource_preset_id = "s-c2-m8"
+      min_resource_preset_id = var.master_resource
     }
   }
   security_group_ids = [yandex_vpc_security_group.cluster.id]
@@ -38,7 +38,7 @@ master {
 
 resource "yandex_kms_symmetric_key" "kms-key" {
   # Ключ Yandex Key Management Service для шифрования важной информации, такой как пароли, OAuth-токены и SSH-ключи.
-  name              = "kms-key"
-  default_algorithm = "AES_128"
-  rotation_period   = "8760h" # 1 год.
+  name              = var.kms_key.name
+  default_algorithm = var.kms_key.algorithm
+  rotation_period   = var.kms_key.rotation
 }
