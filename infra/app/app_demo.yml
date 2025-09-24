@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: app-demo
-        image: cr.yandex/crppqi6tfv23hnubsg5t/demo_app:0.0.5
+        image: cr.yandex/crpi2npa6o8fku0rjon6/demo_app:latest
         ports:
         - containerPort: 80
         resources:

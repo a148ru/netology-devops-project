@@ -2,7 +2,7 @@
 
 DESTROY=0
 image_name="demo_app"
-image_release="0.0.1"
+image_release="latest"
 
 # Выводит справку
 help() {
